@@ -75,7 +75,7 @@ class FileService {
     titleController.clear();
     qaController.clear();
     workgroupController.clear();
-    SnackBarUtils.showSnackbar(context, Icons.add, 'Cleared');
+    SnackBarUtils.showSnackbar(context, Icons.delete_forever_rounded, 'Cleared');
   }
 
   void newDirectory(context) async {

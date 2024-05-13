@@ -10,8 +10,8 @@ void main() async {
   await windowManager.ensureInitialized();
 
   WindowOptions options = const WindowOptions(
-    minimumSize: Size(400, 580),
-    size: Size(600, 780),
+    minimumSize: Size(400, 480),
+    size: Size(500, 580),
     center: true,
     title: 'Qasheets',
   );

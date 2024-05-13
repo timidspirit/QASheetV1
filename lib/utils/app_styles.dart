@@ -20,7 +20,12 @@ class AppTheme {
     color: AppTheme.green,
     fontSize: 30,
     fontWeight: FontWeight.w500,
-    fontStyle: FontStyle.italic,
-  
-  );
+    fontStyle: FontStyle.italic,);
+
+  static const TextStyle optionStyle = TextStyle(
+    color: AppTheme.green,
+    fontSize: 20,
+    fontWeight: FontWeight.w500,
+    fontStyle: FontStyle.italic,);
+
 }

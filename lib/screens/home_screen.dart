@@ -1,7 +1,13 @@
-import "package:flutter/material.dart";
-import "package:qasheets/Wdigets/custom_textfield.dart";
-import "package:qasheets/services/file_service.dart";
-import "package:qasheets/utils/app_styles.dart";
+import 'package:flutter/material.dart';
+import 'package:qasheets/Wdigets/custom_dropdown.dart';
+import 'package:qasheets/Wdigets/custom_textfield.dart';
+import 'package:qasheets/services/file_service.dart';
+import 'package:qasheets/utils/app_styles.dart';
+
+enum QAStatus {
+  completed,
+  starting,
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   FileService fileService = FileService();
+  QAStatus? _selectedStatus = QAStatus.starting;
 
   @override
   void initState() {
@@ -21,8 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onFieldChange() {
     setState(() {
-      fileService.fieldsNotEmpty = 
-        fileService.titleController.text.isNotEmpty &&
+      fileService.fieldsNotEmpty = fileService.titleController.text.isNotEmpty &&
           fileService.qaController.text.isNotEmpty &&
           fileService.workgroupController.text.isNotEmpty;
     });
@@ -73,8 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   children: [
                     _actionButton2(
-                      () => fileService.clearFields(context), 
-                      Icons.delete_forever_rounded),
+                      () => fileService.clearFields(context),
+                      Icons.delete_forever_rounded,
+                    ),
                     const SizedBox(width: 8),
                     _actionButton2(() => fileService.newDirectory(context), Icons.folder),
                   ],
@@ -88,28 +95,61 @@ class _HomeScreenState extends State<HomeScreen> {
               hinttext: 'Leave blank or enter to name output folder',
               controller: fileService.titleController,
             ),
-            const SizedBox(height: 20),
-            CustomTextField(
-              maxLength: 100,
-              hinttext: 'Completed or Just Starting',
-              controller: fileService.qaController,
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: ListTile(
+                    title: const Text('Completed'),
+                    titleTextStyle: AppTheme.optionStyle,
+                    leading: Radio<QAStatus>(
+                      value: QAStatus.completed,
+                      groupValue: _selectedStatus,
+                      onChanged: (QAStatus? value) {
+                        setState(() {
+                          _selectedStatus = value;
+                          fileService.qaController.text = value.toString().split('.').last;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ListTile(
+                    title: const Text('Just Starting'),
+                    titleTextStyle: AppTheme.optionStyle,
+                    leading: Radio<QAStatus>(
+                      value: QAStatus.starting,
+                      groupValue: _selectedStatus,
+                      onChanged: (QAStatus? value) {
+                        setState(() {
+                          _selectedStatus = value;
+                          fileService.qaController.text = value.toString().split('.').last;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
-            CustomTextField(
-              maxLength: 100,
-              hinttext: 'Select WorkGroup',
-              controller: fileService.workgroupController,
+            const Row(
+              children: <Widget> [
+                Expanded(
+                  child: CustomDropDown(null),
+                  ),
+              ],
             ),
             const SizedBox(height: 20),
             Row(
               children: [
-              _mainButton(
-                fileService.fieldsNotEmpty 
-                ? () => fileService.saveContent(context) 
-                : null , 
-                'Save Button'),
+                _mainButton(
+                  fileService.fieldsNotEmpty
+                      ? () => fileService.saveContent(context)
+                      : null,
+                  'Save Button',
+                ),
               ],
-            )
+            ),
           ],
         ),
       ),
