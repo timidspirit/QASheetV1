@@ -11,18 +11,18 @@ enum QAStatus {
 }
 
 enum PDFGroup {
-  group1,
-  group2,
-  group3,
-  group4,
-  group5,
-  group6,
+  csa,
+  inflight,
+  pilot,
+  maintence,
+  dev,
+  ramp,
 }
 
 enum PDFType {
-  typeA,
-  typeB,
-  typeC,
+  newHire,
+  breakFix,
+  other,
 }
 
 
