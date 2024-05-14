@@ -1,17 +1,24 @@
-import "package:excel/excel.dart";
-import "package:flutter/services.dart";
+import 'package:excel/excel.dart';
+import 'dart:io';
 
+class ExcelReaderService {
+  List<Map<String, dynamic>> readExcel(File file) {
+    var bytes = file.readAsBytesSync();
+    var excel = Excel.decodeBytes(bytes);
 
-Future<List<List<String>>> readExcel(String filePath) async {
-  ByteData data = await rootBundle.load(filePath);
-  var bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-  var excel = Excel.decodeBytes(bytes);
+    List<Map<String, dynamic>> data = [];
 
-  List<List<String>> rows = [];
-  for (var table in excel.tables.keys) {
-      for (var row in excel.tables[table]!.rows) {
-          rows.add(row.map((cell) => cell?.value?.toString() ?? "").toList());
+    for (var table in excel.tables.keys) {
+      var sheet = excel.tables[table];
+
+      for (var row in sheet!.rows) {
+        Map<String, dynamic> rowData = {};
+        for (var cell in row) {
+          rowData[cell!.columnIndex.toString()] = cell.value;
+        }
+        data.add(rowData);
       }
+    }
+    return data;
   }
-  return rows;
 }

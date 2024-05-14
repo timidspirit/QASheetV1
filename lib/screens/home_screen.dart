@@ -1,13 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:qasheets/Wdigets/custom_dropdown.dart';
 import 'package:qasheets/Wdigets/custom_textfield.dart';
 import 'package:qasheets/services/file_service.dart';
+import 'package:qasheets/services/pdf_service.dart';
 import 'package:qasheets/utils/app_styles.dart';
+
 
 enum QAStatus {
   completed,
   starting,
 }
+
+enum PDFGroup {
+  group1,
+  group2,
+  group3,
+  group4,
+  group5,
+  group6,
+}
+
+enum PDFType {
+  typeA,
+  typeB,
+  typeC,
+}
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,6 +36,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   FileService fileService = FileService();
   QAStatus? _selectedStatus = QAStatus.starting;
+  List<Map<String, dynamic>> _excelData = [];
 
   @override
   void initState() {
@@ -29,8 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onFieldChange() {
     setState(() {
       fileService.fieldsNotEmpty = fileService.titleController.text.isNotEmpty &&
-          fileService.qaController.text.isNotEmpty &&
-          fileService.workgroupController.text.isNotEmpty;
+          fileService.qaController.text.isNotEmpty;
     });
   }
 
@@ -38,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
     List<TextEditingController> controllers = [
       fileService.titleController,
       fileService.qaController,
-      fileService.workgroupController,
     ];
 
     for (TextEditingController controller in controllers) {
@@ -50,7 +66,6 @@ class _HomeScreenState extends State<HomeScreen> {
     List<TextEditingController> controllers = [
       fileService.titleController,
       fileService.qaController,
-      fileService.workgroupController,
     ];
 
     for (TextEditingController controller in controllers) {
@@ -64,6 +79,26 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+   void _importExcel() async {
+    await fileService.importExcel(context, (data) {
+      setState(() {
+        _excelData = data;
+      });
+    });
+  }
+
+  void _exportData() {
+    if (_excelData.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please import Excel data first')),
+      );
+      return;
+    }
+
+    PdfService pdfService = PdfService();
+    pdfService.generatePdf(_excelData, fileService.titleController.text, _selectedStatus.toString().split('.').last);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _mainButton(() => fileService.newFile(context), 'New File'),
+                _mainButton(() => _importExcel(), 'New File'),
                 Row(
                   children: [
                     _actionButton2(
@@ -132,22 +167,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            const Row(
-              children: <Widget> [
-                Expanded(
-                  child: CustomDropDown(null),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 20),
             Row(
               children: [
-                _mainButton(
-                  fileService.fieldsNotEmpty
-                      ? () => fileService.saveContent(context)
-                      : null,
-                  'Save Button',
+                _mainButton(() => _exportData(), 'Export File'
                 ),
+              
               ],
             ),
           ],

@@ -1,14 +1,13 @@
 import "dart:io";
-
 import "package:file_picker/file_picker.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:qasheets/services/excel_reader_service.dart";
 import "package:qasheets/utils/snackbar_utils.dart";
 
 class FileService {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController qaController = TextEditingController();
-  final TextEditingController workgroupController = TextEditingController();
 
   bool fieldsNotEmpty = false;
 
@@ -24,10 +23,9 @@ class FileService {
 
   void saveContent(context) async {
     final title = titleController.text;
-    final workgroup = workgroupController.text;
 
     final textContent = 
-        "Title:\n\n$title\n\nWorkgroup:\n\n$workgroup";
+        "Title:\n\n$title\n\n";
       
     try {
       if (_selectedFile!= null) {
@@ -39,7 +37,7 @@ class FileService {
           final directory = await FilePicker.platform.getDirectoryPath();
           _selectedDirectory = metadetaDirPath = directory!;
         }
-        final filePath = '$metadetaDirPath/$todayDate - $title - $workgroup.txt';
+        final filePath = '$metadetaDirPath/$todayDate - $title.txt';
         final newFile = File(filePath);
         await newFile.writeAsString(textContent);
       }
@@ -49,32 +47,38 @@ class FileService {
     }
   }
 
-  void newFile(context) async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles();
+Future<void> importExcel(BuildContext context, Function(List<Map<String, dynamic>>) onImport) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
 
-      if (result!= null) { 
-        File file = File(result.files.single.path!);
-        _selectedFile = file;
-
-        final fileContent = await file.readAsString();
-
-        final lines = fileContent.split('\n');
-        titleController.text = lines[2];
-        qaController.text = lines[4];
-        workgroupController.text = lines[6];
-        SnackBarUtils.showSnackbar(context, Icons.upload_file, 'Loaded');
-      } else {SnackBarUtils.showSnackbar(context, Icons.error_rounded, 'Failed to load');
+    if (result != null) {
+      File file = File(result.files.single.path!);
+      ExcelReaderService excelReader = ExcelReaderService();
+      List<Map<String, dynamic>> data = excelReader.readExcel(file);
+      onImport(data);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Excel file imported successfully')),
+        );
       }
-    } catch (e) {
-      SnackBarUtils.showSnackbar(context, Icons.error, 'Failed to load');
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('File import canceled'),
+          ),
+        );
+      }
     }
   }
+
+
 
   void clearFields(context) { 
     titleController.clear();
     qaController.clear();
-    workgroupController.clear();
+
     SnackBarUtils.showSnackbar(context, Icons.delete_forever_rounded, 'Cleared');
   }
 
