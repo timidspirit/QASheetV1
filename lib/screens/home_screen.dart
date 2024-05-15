@@ -4,27 +4,10 @@ import 'package:qasheets/services/file_service.dart';
 import 'package:qasheets/services/pdf_service.dart';
 import 'package:qasheets/utils/app_styles.dart';
 
-
 enum QAStatus {
   completed,
   starting,
 }
-
-enum PDFGroup {
-  csa,
-  inflight,
-  pilot,
-  maintence,
-  dev,
-  ramp,
-}
-
-enum PDFType {
-  newHire,
-  breakFix,
-  other,
-}
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -79,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-   void _importExcel() async {
+  void _importExcel() async {
     await fileService.importExcel(context, (data) {
       setState(() {
         _excelData = data;
@@ -87,16 +70,24 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _exportData() {
+  void _exportData() async {
     if (_excelData.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please import Excel data first')),
+        SnackBar(content: Text('Please import Excel data first')),
       );
       return;
     }
 
     PdfService pdfService = PdfService();
-    pdfService.generatePdf(_excelData, fileService.titleController.text, _selectedStatus.toString().split('.').last);
+    String pdfPath = await pdfService.generatePdf(
+      _excelData,
+      fileService.titleController.text,
+      _selectedStatus?.toString().split('.').last ?? 'Unknown Status',
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('PDF saved to $pdfPath')),
+    );
   }
 
   @override
@@ -110,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _mainButton(() => _importExcel(), 'New File'),
+                _mainButton(_importExcel, 'New File'),
                 Row(
                   children: [
                     _actionButton2(
@@ -166,12 +157,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 100),
             Row(
               children: [
-                _mainButton(() => _exportData(), 'Export File'
+                _mainButton(
+                  _excelData.isNotEmpty
+                      ? _exportData
+                      : null,
+                  'Export to PDF',
                 ),
-              
               ],
             ),
           ],
