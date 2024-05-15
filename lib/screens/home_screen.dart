@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:qasheets/Wdigets/custom_textfield.dart';
 import 'package:qasheets/services/file_service.dart';
@@ -66,6 +68,12 @@ class _HomeScreenState extends State<HomeScreen> {
     await fileService.importExcel(context, (data) {
       setState(() {
         _excelData = data;
+        // Print the keys of the first row to inspect them
+        if (_excelData.isNotEmpty) {
+          print("Excel Data Keys: ${_excelData[0].keys}");
+        } else {
+          print("Excel Data is empty");
+        }
       });
     });
   }
@@ -78,16 +86,27 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
+    String exportDirectoryPath = await fileService.getExportDirectoryName();
+    Directory exportDirectory = Directory(exportDirectoryPath);
     PdfService pdfService = PdfService();
-    String pdfPath = await pdfService.generatePdf(
-      _excelData,
-      fileService.titleController.text,
-      _selectedStatus?.toString().split('.').last ?? 'Unknown Status',
-    );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('PDF saved to $pdfPath')),
-    );
+    // Start from the second row (index 1)
+    for (var i = 1; i < _excelData.length; i++) {
+      var row = _excelData[i];
+      print("Generating PDF for row: $row");
+      String pdfPath = await pdfService.generatePdf(
+        row,
+        fileService.titleController.text,
+        _selectedStatus?.toString().split('.').last ?? 'Unknown Status',
+        exportDirectory,
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('PDF saved to $pdfPath')),
+        );
+      }
+    }
   }
 
   @override
@@ -102,14 +121,13 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _mainButton(_importExcel, 'New File'),
+                _mainButton(() => fileService.newDirectory(context), 'Set Export Directory'),
                 Row(
                   children: [
                     _actionButton2(
                       () => fileService.clearFields(context),
                       Icons.delete_forever_rounded,
                     ),
-                    const SizedBox(width: 8),
-                    _actionButton2(() => fileService.newDirectory(context), Icons.folder),
                   ],
                 ),
               ],
@@ -157,13 +175,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 100),
+            const SizedBox(height: 20),
             Row(
               children: [
                 _mainButton(
-                  _excelData.isNotEmpty
-                      ? _exportData
-                      : null,
+                  _excelData.isNotEmpty ? _exportData : null,
                   'Export to PDF',
                 ),
               ],
