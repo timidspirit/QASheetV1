@@ -11,6 +11,7 @@ class FileService {
   final TextEditingController qaController = TextEditingController();
 
   bool fieldsNotEmpty = false;
+  List<Map<String, dynamic>> _excelData = [];
 
   File? _selectedFile;
   String _selectedDirectory = '';
@@ -22,7 +23,35 @@ class FileService {
     return formattedDate;
   }
 
- 
+  void saveContent(BuildContext context) async {
+    final title = titleController.text;
+
+    final textContent = "Title:\n\n$title\n\n";
+
+    try {
+      if (_selectedFile != null) {
+        await _selectedFile!.writeAsString(textContent);
+      } else {
+        final todayDate = getTodayDate();
+        String metadetaDirPath = _selectedDirectory;
+        if (metadetaDirPath.isEmpty) {
+          final directory = await FilePicker.platform.getDirectoryPath();
+          _selectedDirectory = metadetaDirPath = directory!;
+        }
+        final filePath = '$metadetaDirPath/$todayDate - $title.txt';
+        final newFile = File(filePath);
+        await newFile.writeAsString(textContent);
+      }
+      if (context.mounted) {
+        SnackBarUtils.showSnackbar(context, Icons.check, 'Saved');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        SnackBarUtils.showSnackbar(context, Icons.error, 'Failed to save');
+      }
+    }
+  }
+
   Future<void> importExcel(BuildContext context, Function(List<Map<String, dynamic>>) onImport) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -71,19 +100,24 @@ class FileService {
     return (await getApplicationDocumentsDirectory()).path;
   }
 
-  void clearFields(context) {
+  void clearFields(BuildContext context) {
     titleController.clear();
     qaController.clear();
+    _excelData.clear(); // Clear the Excel data
 
     SnackBarUtils.showSnackbar(context, Icons.delete_forever_rounded, 'Cleared');
   }
 
-  void newDirectory(context) async {
+  void newDirectory(BuildContext context) async {
     try {
       String? directory = await FilePicker.platform.getDirectoryPath();
       if (directory != null) {
         _selectedDirectory = directory;
         _selectedFile = null;
+        
+        // Create the directory if it doesn't exist
+        Directory(_selectedDirectory).createSync(recursive: true);
+        
         if (context.mounted) {
           SnackBarUtils.showSnackbar(context, Icons.folder, 'Directory selected');
         }
@@ -97,5 +131,24 @@ class FileService {
         SnackBarUtils.showSnackbar(context, Icons.error, 'Failed to select directory');
       }
     }
+  }
+
+  void setExcelData(List<Map<String, dynamic>> excelData) {
+    _excelData = excelData;
+  }
+
+  List<Map<String, dynamic>> getExcelData() {
+    return _excelData;
+  }
+
+  void appReset(BuildContext context) {
+    clearFields(context);
+    _selectedFile = null;
+    _selectedDirectory = '';
+    SnackBarUtils.showSnackbar(context, Icons.refresh, 'App reset');
+  }
+
+  String getSelectedDirectory() {
+    return _selectedDirectory;
   }
 }

@@ -1,5 +1,5 @@
+import 'package:pdf/pdf.dart'; // Ensure this import is present
 import 'package:flutter/services.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'dart:io';
 
@@ -36,7 +36,7 @@ class PdfService {
     },
   };
 
-    String determineStatement(String? deviceType, String? kitType) {
+  String determineStatement(String? deviceType, String? kitType) {
     if (deviceType == null || kitType == null) {
       return 'Unknown Statement';
     }
@@ -44,41 +44,70 @@ class PdfService {
   }
 
   String sanitizeFileName(String fileName) {
-    // Replace invalid characters with underscores
     return fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
   }
 
-  Future<String> generatePdf(Map<String, dynamic> row, String userText, String status, Directory exportDirectory) async {
-    print("Starting PDF generation for row: $row");
+  String formatDate(String date) {
+    try {
+      DateTime dateTime = DateTime.parse(date);
+      return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return date; // Return the original date if parsing fails
+    }
+  }
 
+  Future<String> generatePdf(Map<String, dynamic> row, String userText, String status, Directory exportDirectory) async {
     final pdf = pw.Document();
     bool isCompleted = status == 'completed';
 
-    // Load the Roboto font
     final fontData = await rootBundle.load("assets/fonts/Roboto-Regular.ttf");
     final ttf = pw.Font.ttf(fontData.buffer.asByteData());
-    print("Font loaded successfully");
 
-    // Removed the statement section as requested
-
+    final deviceType = row['DEVICE TYPE'];
+    final kitType = row['KIT TYPE'];
+    final title = 'QA Sheet - ${deviceType ?? 'Unknown Device'} - ${kitType ?? 'Unknown Kit'}';
+    
     pdf.addPage(
       pw.Page(
         build: (pw.Context context) {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text('QA Sheet', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, font: ttf)),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(title, style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, font: ttf)),
+                  if (row['QA (initials)'] != null)
+                    pw.Text('QA: ${row['QA (initials)']}', style: pw.TextStyle(fontSize: 14, font: ttf)),
+                ],
+              ),
               pw.SizedBox(height: 20),
-              _buildTextField('Cherwell Ticket/Task', row['CHERWELL TICKET/TASK'], ttf),
-              _buildTextField('Device Type', row['DEVICE TYPE'], ttf),
-              _buildTextField('SN', row['SN'], ttf),
-              _buildTextField('IMEI', row['IMEI'], ttf),
-              _buildTextField('EID', row['EID'], ttf),
-              _buildTextField('Activation Date', row['ACTIVATION DATE'], ttf),
-              _buildTextField('MagTek SN', row['MAGTEK SN'], ttf),
-              _buildTextField('Kit Type', row['KIT TYPE'], ttf),
-              _buildTextField('Battery %', row['BATTERY %'], ttf),
-              _buildTextField('QA (initials)', row['QA (initials)'], ttf),
+              if (row['CHERWELL TICKET/TASK'] != null)
+                _buildTextField('Cherwell Ticket/Task', row['CHERWELL TICKET/TASK'], ttf),
+              pw.Row(
+                children: [
+                  if (row['SN'] != null)
+                    _buildTextFieldExpanded('SN', row['SN'], ttf),
+                  if (row['IMEI'] != null)
+                    _buildTextFieldExpanded('IMEI', row['IMEI'], ttf),
+                ],
+              ),
+              pw.Row(
+                children: [
+                  if (row['EID'] != null)
+                    _buildTextFieldExpanded('EID', row['EID'], ttf),
+                  if (row['ACTIVATION DATE'] != null)
+                    _buildTextFieldExpanded('Activation Date', formatDate(row['ACTIVATION DATE']), ttf),
+                ],
+              ),
+              pw.Row(
+                children: [
+                  if (row['MAGTEK SN'] != null)
+                    _buildTextFieldExpanded('MagTek SN', row['MAGTEK SN'], ttf),
+                  if (row['BATTERY %'] != null)
+                    _buildTextFieldExpanded('Battery %', row['BATTERY %'], ttf),
+                ],
+              ),
               pw.SizedBox(height: 20),
               pw.Text('Checklist:', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, font: ttf)),
               pw.SizedBox(height: 10),
@@ -110,14 +139,11 @@ class PdfService {
       ),
     );
 
-    print("Page added to PDF");
-
     String fileName = sanitizeFileName('${row['KIT TYPE'] ?? 'unknown'}_${row['DEVICE TYPE'] ?? 'unknown'}_${row['SN'] ?? 'unknown'}_${row['IMEI'] ?? 'unknown'}.pdf');
     final outputFile = File('${exportDirectory.path}/$fileName');
     final pdfBytes = await pdf.save();
     await outputFile.writeAsBytes(pdfBytes);
-    print("PDF saved to: ${outputFile.path}");
-    return outputFile.path; // Return the path of the saved PDF
+    return outputFile.path;
   }
 
   pw.Widget _buildTextField(String label, String? value, pw.Font ttf) {
@@ -129,12 +155,37 @@ class PdfService {
     );
   }
 
+  pw.Widget _buildTextFieldExpanded(String label, String? value, pw.Font ttf) {
+    return pw.Expanded(
+      child: pw.Row(
+        children: [
+          pw.Text('$label: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, font: ttf)),
+          pw.Text(value ?? '', style: pw.TextStyle(font: ttf)),
+        ],
+      ),
+    );
+  }
+
   pw.Widget _buildChecklist(String label, bool isChecked, pw.Font ttf) {
     return pw.Row(
       children: [
-        pw.Text(
-          isChecked ? '✓' : '☐',
-          style: pw.TextStyle(font: ttf, fontSize: 18),
+        pw.Container(
+          width: 12,
+          height: 12,
+          decoration: pw.BoxDecoration(
+            border: pw.Border.all(width: 1),
+          ),
+          child: isChecked
+              ? pw.Center(
+                  child: pw.Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const pw.BoxDecoration(
+                      color: PdfColors.black,
+                    ),
+                  ),
+                )
+              : null,
         ),
         pw.SizedBox(width: 4),
         pw.Text(label, style: pw.TextStyle(font: ttf)),

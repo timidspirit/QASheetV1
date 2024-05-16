@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qasheets/Wdigets/custom_textfield.dart';
 import 'package:qasheets/services/file_service.dart';
@@ -68,11 +69,15 @@ class _HomeScreenState extends State<HomeScreen> {
     await fileService.importExcel(context, (data) {
       setState(() {
         _excelData = data;
-        // Print the keys of the first row to inspect them
+        fileService.setExcelData(data);
         if (_excelData.isNotEmpty) {
-          print("Excel Data Keys: ${_excelData[0].keys}");
+          if (kDebugMode) {
+            print("Excel Data Keys: ${_excelData[0].keys}");
+          }
         } else {
-          print("Excel Data is empty");
+          if (kDebugMode) {
+            print("Excel Data is empty");
+          }
         }
       });
     });
@@ -81,32 +86,69 @@ class _HomeScreenState extends State<HomeScreen> {
   void _exportData() async {
     if (_excelData.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please import Excel data first')),
+        const SnackBar(content: Text('Please import Excel data first')),
       );
       return;
     }
 
-    String exportDirectoryPath = await fileService.getExportDirectoryName();
+    String folderName;
+    if (fileService.titleController.text.isNotEmpty) {
+      folderName = fileService.titleController.text;
+    } else {
+      folderName = (await fileService.getExportDirectoryName()).split('/').last;
+    }
+
+    String exportDirectoryPath = '${fileService.getSelectedDirectory()}/$folderName';
     Directory exportDirectory = Directory(exportDirectoryPath);
+    if (!exportDirectory.existsSync()) {
+      exportDirectory.createSync(recursive: true);
+    }
+
     PdfService pdfService = PdfService();
 
-    // Start from the second row (index 1)
-    for (var i = 1; i < _excelData.length; i++) {
-      var row = _excelData[i];
-      print("Generating PDF for row: $row");
-      String pdfPath = await pdfService.generatePdf(
+    for (var row in _excelData) {
+      if (kDebugMode) {
+        print("Generating PDF for row: $row");
+      }
+      await pdfService.generatePdf(
         row,
         fileService.titleController.text,
         _selectedStatus?.toString().split('.').last ?? 'Unknown Status',
         exportDirectory,
       );
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('PDF saved to $pdfPath')),
-        );
-      }
     }
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('All PDFs have been saved to $exportDirectoryPath')),
+      );
+    }
+  }
+
+  void _handleRightClick(BuildContext context, Offset position) {
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+    showMenu(
+      context: context,
+      position: RelativeRect.fromRect(
+        position & const Size(40, 40),
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        const PopupMenuItem(
+          value: 'appReset',
+          child: Text('App Reset'),
+        ),
+      ],
+    ).then((value) {
+      if (value != null) {
+        switch (value) {
+          case 'appReset':
+            fileService.appReset(context);
+            break;
+        }
+      }
+    });
   }
 
   @override
@@ -120,13 +162,18 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _mainButton(_importExcel, 'New File'),
+                _mainButton(_importExcel, 'Import New File'),
                 _mainButton(() => fileService.newDirectory(context), 'Set Export Directory'),
                 Row(
                   children: [
-                    _actionButton2(
-                      () => fileService.clearFields(context),
-                      Icons.delete_forever_rounded,
+                    GestureDetector(
+                      onSecondaryTapDown: (details) {
+                        _handleRightClick(context, details.globalPosition);
+                      },
+                      child: _actionButton2(
+                        () => fileService.clearFields(context),
+                        Icons.delete_forever_rounded,
+                      ),
                     ),
                   ],
                 ),
@@ -178,12 +225,40 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             Row(
               children: [
-                _mainButton(
-                  _excelData.isNotEmpty ? _exportData : null,
-                  'Export to PDF',
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: _mainButton(
+                      _excelData.isNotEmpty ? _exportData : null,
+                      'Export to PDF',
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: _mainButton(
+                      _excelData.isNotEmpty && _excelData.isEmpty ? () {} : null,
+                      'Export for Odoo',
+                    ),
+                  ),
                 ),
               ],
             ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: _mainButton(
+                      _excelData.isNotEmpty && _excelData.isEmpty? () {} : null,
+                      'Export Both',
+                    ),
+                  ),
+                ),
+              ],
+            )
           ],
         ),
       ),
