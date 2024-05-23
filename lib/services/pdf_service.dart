@@ -5,8 +5,13 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter/services.dart';
 import 'package:qasheets/UpdateThis/checklists.dart';
 import 'package:qasheets/UpdateThis/statements.dart';
+import 'excel_reader_service.dart';
 
 class PdfService {
+  final ExcelReaderService excelReaderService;
+
+  PdfService(this.excelReaderService);
+
   String determineStatement(String? deviceType, String? kitType) {
     if (deviceType == null || kitType == null) {
       return 'Unknown Statement';
@@ -29,6 +34,19 @@ class PdfService {
 
   List<String>? getChecklist(String? kitType) {
     return checklists[kitType];
+  }
+
+  Future<void> generatePdfAndCopyExcel(File excelFile, String userText, String status, Directory exportDirectory) async {
+    final excelData = excelReaderService.getExcelData();
+
+    for (var row in excelData) {
+      await generatePdf(row, userText, status, exportDirectory);
+    }
+
+    // After all PDFs are generated, copy the Excel file to the export directory
+    final excelFileName = excelFile.path.split('/').last;
+    final outputExcelFile = File('${exportDirectory.path}/$excelFileName');
+    await excelFile.copy(outputExcelFile.path);
   }
 
   Future<String> generatePdf(Map<String, dynamic> row, String userText, String status, Directory exportDirectory) async {

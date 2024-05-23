@@ -9,11 +9,10 @@ import 'package:path_provider/path_provider.dart';
 class FileService {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController qaController = TextEditingController();
+  final ExcelReaderService excelReaderService = ExcelReaderService();
 
   bool fieldsNotEmpty = false;
-  List<Map<String, dynamic>> _excelData = [];
-
-  File? _selectedFile;
+  File? selectedFile;
   String _selectedDirectory = '';
 
   String getTodayDate() {
@@ -29,8 +28,8 @@ class FileService {
     final textContent = "Title:\n\n$title\n\n";
 
     try {
-      if (_selectedFile != null) {
-        await _selectedFile!.writeAsString(textContent);
+      if (selectedFile != null) {
+        await selectedFile!.writeAsString(textContent);
       } else {
         final todayDate = getTodayDate();
         String metadetaDirPath = _selectedDirectory;
@@ -60,9 +59,8 @@ class FileService {
 
     if (result != null) {
       try {
-        File file = File(result.files.single.path!);
-        ExcelReaderService excelReader = ExcelReaderService();
-        List<Map<String, dynamic>> data = excelReader.readExcel(file);
+        selectedFile = File(result.files.single.path!);
+        List<Map<String, dynamic>> data = excelReaderService.readExcel(selectedFile!);
         onImport(data);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -103,7 +101,7 @@ class FileService {
   void clearFields(BuildContext context) {
     titleController.clear();
     qaController.clear();
-    _excelData.clear(); // Clear the Excel data
+    excelReaderService.getExcelData().clear(); // Clear the Excel data
 
     SnackBarUtils.showSnackbar(context, Icons.delete_forever_rounded, 'Cleared');
   }
@@ -113,7 +111,7 @@ class FileService {
       String? directory = await FilePicker.platform.getDirectoryPath();
       if (directory != null) {
         _selectedDirectory = directory;
-        _selectedFile = null;
+        selectedFile = null;
         
         // Create the directory if it doesn't exist
         Directory(_selectedDirectory).createSync(recursive: true);
@@ -133,17 +131,9 @@ class FileService {
     }
   }
 
-  void setExcelData(List<Map<String, dynamic>> excelData) {
-    _excelData = excelData;
-  }
-
-  List<Map<String, dynamic>> getExcelData() {
-    return _excelData;
-  }
-
   void appReset(BuildContext context) {
     clearFields(context);
-    _selectedFile = null;
+    selectedFile = null;
     _selectedDirectory = '';
     SnackBarUtils.showSnackbar(context, Icons.refresh, 'App reset');
   }

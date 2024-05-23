@@ -23,11 +23,13 @@ class _HomeScreenState extends State<HomeScreen> {
   FileService fileService = FileService();
   QAStatus? _selectedStatus = QAStatus.starting;
   List<Map<String, dynamic>> _excelData = [];
+  late PdfService pdfService;
 
   @override
   void initState() {
     super.initState();
     addListeners();
+    pdfService = PdfService(fileService.excelReaderService); // Initialize PdfService with ExcelReaderService
   }
 
   void _onFieldChange() {
@@ -69,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await fileService.importExcel(context, (data) {
       setState(() {
         _excelData = data;
-        fileService.setExcelData(data);
+        fileService.excelReaderService.setExcelData(data);
         if (_excelData.isNotEmpty) {
           if (kDebugMode) {
             print("Excel Data Keys: ${_excelData[0].keys}");
@@ -104,8 +106,6 @@ class _HomeScreenState extends State<HomeScreen> {
       exportDirectory.createSync(recursive: true);
     }
 
-    PdfService pdfService = PdfService();
-
     for (var row in _excelData) {
       if (kDebugMode) {
         print("Generating PDF for row: $row");
@@ -116,6 +116,13 @@ class _HomeScreenState extends State<HomeScreen> {
         _selectedStatus?.toString().split('.').last ?? 'Unknown Status',
         exportDirectory,
       );
+    }
+
+    // Copy the Excel file to the export directory
+    if (fileService.selectedFile != null) {
+      final excelFileName = fileService.selectedFile!.path.split('/').last;
+      final outputExcelFile = File('${exportDirectory.path}/$excelFileName');
+      await fileService.selectedFile!.copy(outputExcelFile.path);
     }
 
     if (context.mounted) {
@@ -252,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Align(
                     alignment: Alignment.center,
                     child: _mainButton(
-                      _excelData.isNotEmpty && _excelData.isEmpty? () {} : null,
+                      _excelData.isNotEmpty && _excelData.isEmpty ? () {} : null,
                       'Export Both',
                     ),
                   ),
