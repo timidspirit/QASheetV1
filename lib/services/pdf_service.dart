@@ -1,62 +1,97 @@
 import 'package:flutter/foundation.dart';
-import 'package:pdf/pdf.dart'; // Ensure this import is present
+import 'package:pdf/pdf.dart'; 
 import 'package:flutter/services.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'dart:io';
 
 class PdfService {
   final Map<String, Map<String, String>> statements = {
-    'IPHONE 12': {
-      'NEW HIRE': 'Statement for IPHONE 12, NEW HIRE',
-      'WEB|NHR': 'Statement for IPHONE 12, WEB|NHR',
+    'IPHONE 12': { //Update Field and below when changing the excel import sheet
       'DEV': 'Statement for IPHONE 12, DEV',
-      'BREAKFIX - 12 > FULL KIT': 'Statement for IPHONE 12, BREAKFIX - 12 > FULL KIT',
-      'BREAKFIX - 12 > NO MAGTEK': 'Statement for IPHONE 12, BREAKFIX - 12 > NO MAGTEK',
       'ITS': 'Statement for IPHONE 12, ITS',
       'OTHER': 'Statement for IPHONE 12, OTHER',
+      'AS InFlight New Hire Dedicated (FULL KIT)': 'Statement for IPHONE 12, AS InFlight New Hire Dedicated (FULL KIT)',
+      'AS InFlight New SHARED (Full Kit)': 'Statement for IPHONE 12, AS InFlight New SHARED (Full Kit)',
+      'AS Break Fix Dedicated (Full Kit)': 'Statement for IPHONE 12, AS Break Fix Dedicated (Full Kit)',
+      'AS Break Fix Dedicated (Device ONLY Kit)': 'Statement for IPHONE 12, AS Break Fix Dedicated (Device ONLY Kit)',
+      'AS Break Fix SHARED (DEVICE ONLY)': 'Statement for IPHONE 12, AS Break Fix SHARED (DEVICE ONLY)',
+      'AS InFlight CLASS Dedicated (FULL KIT)': 'Statement for IPHONE 12, AS InFlight CLASS Dedicated (FULL KIT)',
+      'QX InFlight New Hire Dedicated (FULL KIT)': 'Statement for IPHONE 12, QX InFlight New Hire Dedicated (FULL KIT)',
+      'QX InFlight New SHARED (Full Kit)': 'Statement for IPHONE 12, QX InFlight New SHARED (Full Kit)',
+      'QX Break Fix Dedicated (Full Kit)': 'Statement for IPHONE 12, QX Break Fix Dedicated (Full Kit)',
+      'QX Break Fix Dedicated (Device ONLY Kit)': 'Statement for IPHONE 12, QX Break Fix Dedicated (Device ONLY Kit)',
+      'QX Break Fix SHARED (DEVICE ONLY)': 'Statement for IPHONE 12, QX Break Fix SHARED (DEVICE ONLY)',
+      'QX InFlight CLASS Dedicated (FULL KIT)': 'Statement for IPHONE 12, QX InFlight CLASS Dedicated (FULL KIT)',
+      //Add More Statements Here
     },
-    'IPHONE 13': {
-      'NEW HIRE': 'Statement for IPHONE 13, NEW HIRE',
-      'WEB|NHR': 'Statement for IPHONE 13, WEB|NHR',
-      'Refresh': 'Statement for IPHONE 13, Refresh',
+    'IPHONE 13': { //Update Field and below when changing the excel import sheet
       'DEV': 'Statement for IPHONE 13, DEV',
-      'BREAKFIX - 13 > FULL KIT': 'Statement for IPHONE 13, BREAKFIX - 13 > FULL KIT',
-      'BREAKFIX - 13 > DEVICE AND': 'Statement for IPHONE 13, BREAKFIX - 13 > DEVICE AND',
       'ITS': 'Statement for IPHONE 13, ITS',
       'OTHER': 'Statement for IPHONE 13, OTHER',
+      'AS InFlight New Hire Dedicated (FULL KIT)': 'Statement for IPHONE 13, AS InFlight New Hire Dedicated (FULL KIT)',
+      'AS InFlight New SHARED (Full Kit)': 'Statement for IPHONE 13, AS InFlight New SHARED (Full Kit)',
+      'AS Break Fix Dedicated (Full Kit)': 'Statement for IPHONE 13, AS Break Fix Dedicated (Full Kit)',
+      'AS Break Fix Dedicated (Device ONLY Kit)': 'Statement for IPHONE 13, AS Break Fix Dedicated (Device ONLY Kit)',
+      'AS Break Fix SHARED (DEVICE ONLY)': 'Statement for IPHONE 13, AS Break Fix SHARED (DEVICE ONLY)',
+      'AS InFlight CLASS Dedicated (FULL KIT)': 'Statement for IPHONE 13, AS InFlight CLASS Dedicated (FULL KIT)',
+      'QX InFlight New Hire Dedicated (FULL KIT)': 'Statement for IPHONE 13, QX InFlight New Hire Dedicated (FULL KIT)',
+      'QX InFlight New SHARED (Full Kit)': 'Statement for IPHONE 13, QX InFlight New SHARED (Full Kit)',
+      'QX Break Fix Dedicated (Full Kit)': 'Statement for IPHONE 13, QX Break Fix Dedicated (Full Kit)',
+      'QX Break Fix Dedicated (Device ONLY Kit)': 'Statement for IPHONE 13, QX Break Fix Dedicated (Device ONLY Kit)',
+      'QX Break Fix SHARED (DEVICE ONLY)': 'Statement for IPHONE 13, QX Break Fix SHARED (DEVICE ONLY)',
+      'QX InFlight CLASS Dedicated (FULL KIT)': 'Statement for IPHONE 13, QX InFlight CLASS Dedicated (FULL KIT)',
+      //Add More Statements Here
     },
-    'IPHONE 15': {
-      'NEW HIRE': 'Statement for IPHONE 15, NEW HIRE',
-      'WEB|NHR': 'Statement for IPHONE 15, WEB|NHR',
+    'IPHONE 15': { //Update Field and below when changing the excel import sheet
       'Refresh': 'Statement for IPHONE 15, Refresh',
       'DEV': 'Statement for IPHONE 15, DEV',
-      'BREAKFIX - 15 > FULL KIT': 'Statement for IPHONE 15, BREAKFIX - 15 > FULL KIT',
-      'BREAKFIX - 15 > DEVICE AND': 'Statement for IPHONE 15, BREAKFIX - 15 > DEVICE AND',
       'ITS': 'Statement for IPHONE 15, ITS',
       'OTHER': 'Statement for IPHONE 15, OTHER',
+      'AS InFlight New Hire Dedicated (FULL KIT)': 'Statement for IPHONE 15, AS InFlight New Hire Dedicated (FULL KIT)',
+      'AS InFlight New SHARED (Full Kit)': 'Statement for IPHONE 15, AS InFlight New SHARED (Full Kit)',
+      'AS Break Fix Dedicated (Full Kit)': 'Statement for IPHONE 15, AS Break Fix Dedicated (Full Kit)',
+      'AS Break Fix Dedicated (Device ONLY Kit)': 'Statement for IPHONE 15, AS Break Fix Dedicated (Device ONLY Kit)',
+      'AS Break Fix SHARED (DEVICE ONLY)': 'Statement for IPHONE 15, AS Break Fix SHARED (DEVICE ONLY)',
+      'AS InFlight CLASS Dedicated (FULL KIT)': 'Statement for IPHONE 15, AS InFlight CLASS Dedicated (FULL KIT)',
+      'QX InFlight New Hire Dedicated (FULL KIT)': 'Statement for IPHONE 15, QX InFlight New Hire Dedicated (FULL KIT)',
+      'QX InFlight New SHARED (Full Kit)': 'Statement for IPHONE 15, QX InFlight New SHARED (Full Kit)',
+      'QX Break Fix Dedicated (Full Kit)': 'Statement for IPHONE 15, QX Break Fix Dedicated (Full Kit)',
+      'QX Break Fix Dedicated (Device ONLY Kit)': 'Statement for IPHONE 15, QX Break Fix Dedicated (Device ONLY Kit)',
+      'QX Break Fix SHARED (DEVICE ONLY)': 'Statement for IPHONE 15, QX Break Fix SHARED (DEVICE ONLY)',
+      'QX InFlight CLASS Dedicated (FULL KIT)': 'Statement for IPHONE 15, QX InFlight CLASS Dedicated (FULL KIT)',
+      //Add More Statements Here
     },
-    'MINI 6': {
-      'NEW HIRE': 'Statement for MINI 6, NEW HIRE',
-      'BREAKFIX - MINI 6 > FULL KIT': 'Statement for MINI 6, BREAKFIX - MINI 6 > FULL KIT',
+    'MINI 6': { //Update Field and below when changing the excel import sheet
       'REFRESH': 'Statement for MINI 6, REFRESH',
       'ITS': 'Statement for MINI 6, ITS',
       'DEV': 'Statement for MINI 6, DEV',
+      'CSA New Hire Dedicated (FULL KIT)': 'Statement for MINI 6, CSA New Hire Dedicated (FULL KIT)',
+      'CSA New SHARED (Full Kit)': 'Statement for MINI 6, CSA New SHARED (Full Kit)',
+      'Break Fix Dedicated (Full Kit)': 'Statement for MINI 6, Break Fix Dedicated (Full Kit)',
+      'Break Fix Dedicated (Device ONLY Kit)': 'Statement for MINI 6, Break Fix Dedicated (Device ONLY Kit)',
+      'Break Fix SHARED (DEVICE ONLY)': 'Statement for MINI 6, Break Fix SHARED (DEVICE ONLY)',
+      //Add More Statements Here
     },
-    'MOBY': {
+    'MOBY': { //Update Field and below when changing the excel import sheet
       'NEW HIRE': 'Statement for MOBY, NEW HIRE',
       'BREAKFIX - MOBY ONLY': 'Statement for MOBY, BREAKFIX - MOBY ONLY',
       'REFRESH': 'Statement for MOBY, REFRESH',
       'ITS': 'Statement for MOBY, ITS',
       'DEV': 'Statement for MOBY, DEV',
+      //Add More Statements Here
     },
-    'AIR 5': {
-      'NEW HIRE': 'Statement for AIR 5, NEW HIRE',
-      'BREAKFIX - FULL KIT': 'Statement for AIR 5, BREAKFIX - FULL KIT',
-      'REFRESH': 'Statement for AIR 5, REFRESH',
-      'ITS': 'Statement for AIR 5, ITS',
-      'DEV': 'Statement for AIR 5, DEV',
+    'AIR 5': { //Update Field and below when changing the excel import sheet
+      'AS Pilot - New Hire (DEDICATED)': 'Statement for AIR 5, AS Pilot - New Hire (DEDICATED)',
+      'AS Pilot - BreakFix (DEDICATED)': 'Statement for AIR 5, AS Pilot - BreakFix (DEDICATED)',
+      'AS Pilot - BreakFix (SHARED)': 'Statement for AIR 5, AS Pilot - BreakFix (SHARED)',
+      'QX Pilot - New Hire (DEDICATED)': 'Statement for AIR 5, QX Pilot - New Hire (DEDICATED)',
+      'QX Pilot - BreakFix (DEDICATED)': 'Statement for AIR 5, QX Pilot - BreakFix (DEDICATED)',
+      'QX Pilot - BreakFix (SHARED)': 'Statement for AIR 5, QX Pilot - BreakFix (SHARED)',
+      //Add More Statements Here
     },
   };
+}
+
 
   final Map<String, Map<String, List<String>>> checklistItems = {
     'MINI 6': {
@@ -70,45 +105,14 @@ class PdfService {
       'Confirm the installation of the HUB application.',
       'Verify the cellular connection is operational with the requested carrier.',
       'Confirm that the device can be shut down properly.',
-      'Ensure the mPOS name is added to BlueFin.',
-      'Verify that the mPOS is set to "Activating" on BlueFin.',
-      'Confirm that the Otterbox case is securely on the iPad.',
-      'Ensure the Otterbox magnet is properly attached.',
-      'Confirm that the mPOS clip is properly attached.',
-      'Verify that the mPOS is attached to the iPad.',
-      'Ensure that either the hand strap or shoulder strap is attached.',
-      'Verify that either the hand strap or shoulder strap is included in the kit.',
-      'Confirm the presence of the Apple charging brick (20W) and cable.',
-      'Ensure the charging brick (12W) and cable for the mPOS are included.',
-      'Verify the assigned CSA\'s name is on the foam pouch.',
-      'Ensure the device is packaged properly for safe shipping.',
-      'Confirm the task number and all required labeling are on the shipping box.',
-      'Verify the device\'s movement within Odoo.',
+
       ],
     'CSA - New Hire Dedicated (FULL KIT)': [
       'Verify the Alaska Asset label and Device Identifiers on the iPad.',
       'Ensure that the Serial and IMEI numbers match those displayed in the iPad\'s settings.',
       'Confirm that the device is staged as "STAGING.ASCSADEDICATED.PREDEPLOY".',
       'Check if Location Services are enabled on the iPad.',
-      'Verify that Bluetooth is turned on.',
-      'Ensure the iPad has the most current version of iOS installed.',
-      'Confirm the installation of the HUB application.',
-      'Verify the cellular connection is operational with the requested carrier.',
-      'Confirm that the device can be shut down properly.',
-      'Ensure the mPOS name is added to BlueFin.',
-      'Verify that the mPOS is set to "Activating" on BlueFin.',
-      'Confirm that the Otterbox case is securely on the iPad.',
-      'Ensure the Otterbox magnet is properly attached.',
-      'Confirm that the mPOS clip is properly attached.',
-      'Verify that the mPOS is attached to the iPad.',
-      'Ensure that either the hand strap or shoulder strap is attached.',
-      'Verify that either the hand strap or shoulder strap is included in the kit.',
-      'Confirm the presence of the Apple charging brick (20W) and cable.',
-      'Ensure the charging brick (12W) and cable for the mPOS are included.',
-      'Verify the assigned CSA\'s name is on the foam pouch.',
-      'Ensure the device is packaged properly for safe shipping.',
-      'Confirm the task number and all required labeling are on the shipping box.',
-      'Verify the device\'s movement within Odoo.',
+
     ],
     'CSA - New SHARED (Full Kit)': [
       'Verify the Alaska Asset label and Device Identifiers on the iPad.',
@@ -116,24 +120,7 @@ class PdfService {
       'Confirm that the device is staged as "STAGING.ASCSASHARED.SHARED".',
       'Check if Location Services are enabled on the iPad.',
       'Verify that Bluetooth is turned on.',
-      'Ensure the iPad has the most current version of iOS installed.',
-      'Confirm the installation of the HUB application.',
-      'Verify the cellular connection is operational with the requested carrier.',
-      'Confirm that the device can be shut down properly.',
-      'Ensure the mPOS name is added to BlueFin.',
-      'Verify that the mPOS is set to "Activating" on BlueFin.',
-      'Confirm that the Otterbox case is securely on the iPad.',
-      'Ensure the Otterbox magnet is properly attached.',
-      'Confirm that the mPOS clip is properly attached.',
-      'Verify that the mPOS is attached to the iPad.',
-      'Ensure that either the hand strap or shoulder strap is attached.',
-      'Verify that either the hand strap or shoulder strap is included in the kit.',
-      'Confirm the presence of the Apple charging brick (20W) and cable.',
-      'Ensure the charging brick (12W) and cable for the mPOS are included.',
-      'Verify the assigned CSA\'s name is on the foam pouch.',
-      'Ensure the device is packaged properly for safe shipping.',
-      'Confirm the task number and all required labeling are on the shipping box.',
-      'Verify the device\'s movement within Odoo.',
+
     ],
     'CSA - Break Fix Dedicated (Full Kit)': [
       'Verify the Alaska Asset label and Device Identifiers on the iPad.',
@@ -141,54 +128,18 @@ class PdfService {
       'Confirm that the device is staged as "STAGING.ASCSADEDICATED.PREDEPLOY".',
       'Check if Location Services are enabled on the iPad.',
       'Verify that Bluetooth is turned on.',
-      'Ensure the iPad has the most current version of iOS installed.',
-      'Confirm the installation of the HUB application.',
-      'Verify the cellular connection is operational with the requested carrier.',
-      'Confirm that the device can be shut down properly.',
-      'Add the mPOS name to BlueFin.',
-      'Set the mPOS to "Activating" on BlueFin.',
-      'Confirm that the Otterbox case is securely on the iPad.',
-      'Ensure the Otterbox magnet is properly attached.',
-      'Confirm that the mPOS clip is properly attached.',
-      'Verify that the mPOS is attached to the iPad.',
-      'Ensure that either the hand strap or shoulder strap is attached.',
-      'Verify that either the hand strap or shoulder strap is included in the kit.',
-      'Confirm the presence of the Apple charging brick (20W) and cable.',
-      'Ensure the charging brick (12W) and cable for the mPOS are included.',
-      'Verify the assigned CSA\'s name is on the foam pouch.',
-      'Ensure the device is packaged properly for safe shipping.',
-      'Confirm the task number and all required labeling are on the shipping box.',
-      'Verify the device\'s movement within Odoo.',
+
     ],
     'CSA - Break Fix Dedicated (Device ONLY Kit)': [
       'Verify the Alaska Asset label and Device Identifiers on the iPad.',
       'Ensure that the Serial and IMEI numbers match those displayed in the iPad\'s settings.',
       'Confirm that the device is staged as "STAGING.ASCSADEDICATED.PREDEPLOY".',
-      'Check if Location Services are enabled on the iPad.',
-      'Verify that Bluetooth is turned on.',
-      'Ensure the iPad has the most current version of iOS installed.',
-      'Confirm the installation of the HUB application.',
-      'Verify the cellular connection is operational with the requested carrier.',
-      'Confirm that the device can be shut down properly.',
-      'Confirm that the Otterbox case is securely on the iPad.',
-      'Confirm that the mPOS clip is properly attached.',
-      'Ensure that either the hand strap or shoulder strap is attached.',
-      'Verify that either the hand strap or shoulder strap is included in the kit.',
-      'Confirm the presence of the Apple charging brick (20W) and cable.',
-      'Ensure the charging brick (12W) and cable for the mPOS are included.',
-      'Verify the assigned CSA\'s name is on the foam pouch.',
-      'Ensure the device is packaged properly for safe shipping.',
-      'Confirm the task number and all required labeling are on the shipping box.',
-      'Verify the device\'s movement within Odoo.',
+
     ],
     'CSA - Break Fix Moby Only (Dedicated or Shared)': [
       'Confirm that the device can be shut down properly.',
       'Add the mPOS name to BlueFin.',
-      'Set the mpOS to "Activating" on BlueFin.',
-      'Ensure the charging brick (12W) and cable for the mPOS are included.',
-      'Ensure the device is packaged properly for safe shipping.',
-      'Confirm the task number and all required labeling are on the shipping box.',
-      'Verify the device\'s movement within Odoo.',
+
     ],
     'CSA - Break Fix SHARED (DEVICE ONLY)': [
       'Verify the Alaska Asset label and Device Identifiers on the iPad.',
@@ -196,24 +147,6 @@ class PdfService {
       'Confirm that the device is staged as "STAGING.ASCSASHARED.SHARED".',
       'Check if Location Services are enabled on the iPad.',
       'Verify that Bluetooth is turned on.',
-      'Ensure the iPad has the most current version of iOS installed.',
-      'Confirm the installation of the HUB application.',
-      'Verify the cellular connection is operational with the requested carrier.',
-      'Confirm that the device can be shut down properly.',
-      'Add the mPOS name to BlueFin only if requested.',
-      'Set the mpOS to "Activating" on BlueFin only if requested.',
-      'Confirm that the Otterbox case is securely on the iPad.',
-      'Ensure the Otterbox magnet is properly attached.',
-      'Confirm that the mPOS clip is properly attached only if requested.',
-      'Verify that the mPOS is attached to the iPad only if requested.',
-      'Ensure that either the hand strap or shoulder strap is attached.',
-      'Verify that either the hand strap or shoulder strap is included in the kit.',
-      'Confirm the presence of the Apple charging brick (20W) and cable.',
-      'Ensure the charging brick (12W) and cable for the mPOS are included only if requested.',
-      'Verify the assigned CSA\'s name is on the foam pouch.',
-      'Ensure the device is packaged properly for safe shipping.',
-      'Confirm the task number and all required labeling are on the shipping box.',
-      'Verify the device\'s movement within Odoo.',
     ],
     'Pilot - New Hire': [
       'Verify the Alaska Asset label and Device Identifiers on the iPad.',
@@ -221,38 +154,14 @@ class PdfService {
       'Confirm that the device is staged as "STAGING.ASPILOT.PREDEPLOY".',
       'Check if Location Services are enabled on the iPad.',
       'Ensure the iPad has the most current version of iOS installed.',
-      'Confirm the installation of the HUB application.',
-      'Verify the cellular connection is operational with the requested carrier.',
-      'Ensure GoodReader is configured properly.',
-      'Confirm that the Otterbox case is securely on the iPad.',
-      'Ensure the presence of the Apple charging brick (20W) and cable if requested.',
-      'Verify the name is correct in WS1 if the device is shared.',
-      'Confirm that the device can be shut down properly.',
-      'Ensure the device is packaged properly for safe shipping.',
-      'Confirm the task number and all required labeling are on the shipping box.',
-      'Verify the device\'s movement within Odoo.',
-      'Ensure the device is logged within the Mobile In/Out sheet.',
     ],
     'Pilot - BreakFix': [
       'Verify the Alaska Asset label and Device Identifiers on the iPad.',
       'Confirm the application of the Serial, IMEI, and Model labels on the iPad.',
       'Ensure that the Serial and IMEI numbers match those displayed in the iPad\'s settings.',
-      'Confirm that the device is staged as "STAGING.ASPILOT.PREDEPLOY".',
-      'Check if Location Services are enabled on the iPad.',
-      'Ensure the iPad has the most current version of iOS installed.',
-      'Confirm the installation of the HUB application.',
-      'Verify the cellular connection is operational with the requested carrier.',
-      'Ensure GoodReader is configured properly.',
-      'Confirm that the Otterbox case is securely on the iPad.',
-      'Ensure the presence of the Apple charging brick (20W) and cable.',
-      'Confirm that the device can be shut down properly.',
-      'Ensure the device is packaged properly for safe shipping.',
-      'Confirm the task number and all required labeling are on the shipping box.',
-      'Verify the device\'s movement within Odoo.',
-      'Ensure the device is logged within the Mobile In/Out sheet.',
     ],
-    }, 
-    };
+   }, 
+ };
 
   String determineStatement(String? deviceType, String? kitType) {
     if (deviceType == null || kitType == null) {
@@ -303,7 +212,7 @@ class PdfService {
 
     pdf.addPage(
       pw.Page(
-        build: (pw.Context context) {s
+        build: (pw.Context context) {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
